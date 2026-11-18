@@ -50,18 +50,19 @@ export const AppProvider = ({children})=>{
             const {data} = await requestFn();
             setUser(data.user)
             if(successMsg) toast.success(successMsg)
-                return true;
+                return { success: true, user: data.user };
         } catch (error) {
-             toast.error(getErrMsg(error, errorFallback))
-             return false
+             const errMsg = getErrMsg(error, errorFallback)
+             toast.error(errMsg)
+             return { success: false, error: errMsg }
         }
     }
 
-    const login = (email, password)=>{
+    const login = async (email, password)=>{
         return authAction(()=> api.post("/api/auth/login", {email, password}), "Welcome back!", "Login failed")
     }
 
-    const register = (name, email, password)=>{
+    const register = async (name, email, password)=>{
         return authAction(()=> api.post("/api/auth/register", {name, email, password}), "Account created successfully!", "Registration failed")
     }
 

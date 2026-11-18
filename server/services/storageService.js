@@ -7,19 +7,15 @@ export const getFolderHierarchyIds = async (folderId, ownerId) => {
      SELECT id FROM folders
      WHERE ${folderId} = ANY(path::text[]) AND owner_id = ${ownerId}`;
      return [folderId, ...descendants.map((f)=> f.id)]
-}
-
-// Adjust user storage quota
-export const adjustUserStorage = async (userId, deltaBytes) => {
-    const [user] = await sql`
+}// Log activity to audit table
+export const logActivity = async (action, userId, fileId, folderId, req) => {    try {        const ipAddress = req?.ip || req?.connection?.remoteAddress || undefined;        const userAgent = req?.get('user-agent') || undefined;        await sql`            INSERT INTO activity_log (action, user_id, file_id, folder_id, ip_address, user_agent, success)            VALUES (${action}, ${userId || null}, ${fileId || null}, ${folderId || null}, ${ipAddress}, ${userAgent}, true)        `;    } catch (err) {        // Silently fail - activity logging should not break main flow        console.debug('Activity log error:', err.message);    }}
+// Adjust user storage quota
+export const adjustUserStorage = async (userId, deltaBytes) => {    const [user] = await sql`
     UPDATE users
     SET storage_used = GREATEST(0, storage_used + ${deltaBytes}), updated_at = NOW() WHERE id = ${userId} RETURNING storage_used
     `;
-
-    return user ? Number(user.storage_used) : null;
-}
-
-// Remove share links associated with given resource IDs.
+    return user ? Number(user.storage_used) : null;}
+// Remove share links associated with given resource IDs.
 export const cleanupShareLinks = async (fileIds = [], folderIds = []) => {
     if (fileIds.length === 0 && folderIds.length === 0) return;
 

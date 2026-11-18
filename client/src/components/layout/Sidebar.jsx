@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 import { useApp } from '../../context/AppContext'
 import { Link, useLocation } from 'react-router-dom'
-import { FolderPlusIcon, HardDriveIcon, HardDriveUploadIcon, PlusIcon, Trash2Icon, UsersIcon } from 'lucide-react'
+import { FolderPlusIcon, HardDriveIcon, HardDriveUploadIcon, InboxIcon, PlusIcon, Trash2Icon, UsersIcon } from 'lucide-react'
 import { Dropdown, DropdownItem } from '../ui/Dropdown'
 import { ProgressBar } from '../ui/ProgressBar'
 import { formatBytes } from '../../assets/assets'
@@ -28,6 +28,7 @@ const Sidebar = ({onCreateFolderClick, isMobileOpen, setIsMobileOpen}) => {
     const navItems = [
         {label: "My Drive", path: "/", icon: HardDriveIcon},
         {label: "Shared Files", path: "/shared", icon: UsersIcon},
+        {label: "Shared with Me", path: "/shared-with-me", icon: InboxIcon},
         {label: "Trash", path: "/trash", icon: Trash2Icon},
     ]
   return (

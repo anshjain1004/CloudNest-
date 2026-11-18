@@ -12,17 +12,24 @@ const Login = ({mode = "login"}) => {
     const {login, register} = useApp()
 
     const [form, setForm] = useState({name: "", email: "", password: ""})
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false)
+    const [loginError, setLoginError] = useState('')
+    const [registerError, setRegisterError] = useState('')
 
     const updateField = (key, value)=> setForm((prev)=> ({...prev, [key]: value}));
 
     const handleSubmit = async (e)=>{
         e.preventDefault();
         setIsLoading(true)
-        const ok = isRegister ? await register(form.name, form.email, form.password) : await login(form.email, form.password);
+        const result = isRegister ? await register(form.name, form.email, form.password) : await login(form.email, form.password);
         setIsLoading(false)
-        if(ok) navigate("/")
+        if(result.success) navigate("/")
+        else if(isRegister) setRegisterError(result.error)
+        else setLoginError(result.error)
     }
+
+    // Clear login error when user starts typing    const clearLoginError = () => setLoginError('')
+    const clearRegisterError = () => setRegisterError('')
 
   return (
     <div className="min-h-screen text-zinc-900 flex flex-col md:flex-row">
@@ -55,6 +62,22 @@ const Login = ({mode = "login"}) => {
                         : "Enter your credentials to access your Drive"}
                     </p>
                 </div>
+
+                {/* Floating Login Error Toasts (3 pills stacked) - overlaps column boundary */}
+                {isRegister ? null : (
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 w-max space-y-1">
+                        {loginError && (
+                            <div className="flex items-center gap-2">
+                                {loginError.split('\n').map((error, index) => (
+                                    <div key={index} className="flex items-center gap-2 rounded-full bg-white p-2 shadow-sm border border-red-200/50">
+                                        <svg className="h-4 w-4 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="18" x2="18" y2="6"></line></svg>
+                                        <span>{error}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className='space-y-4'>
                     {isRegister && (
@@ -95,6 +118,16 @@ const Login = ({mode = "login"}) => {
                     </Button>
 
                 </form>
+
+                {/* Inline Error Pill Below Sign In Button */}
+                {isRegister && registerError ? (
+                    <div className="flex items-center justify-center gap-2 text-sm mt-2">
+                        <div className="flex items-center gap-2 rounded-full bg-white p-2 shadow-sm border border-red-200/50">
+                            <svg className="h-4 w-4 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="18" x2="18" y2="6"></line></svg>
+                            <span>{registerError}</span>
+                        </div>
+                    </div>
+                ) : null}
 
                 <div className="text-center pt-2">
                     {isRegister ? (

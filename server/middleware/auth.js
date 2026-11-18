@@ -23,3 +23,22 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({error: "Token invalid or expired. Please log in again."})
     }
 }
+
+// Optional authentication - identifies the caller when a valid session exists,
+// but never blocks the request. Used on public share links so that logged-in
+// visitors are recorded in the access log while anonymous visitors still work.
+export const optionalAuth = async (req, _res, next) => {
+    const token = req.cookies?.token;
+
+    if (!token) return next();
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const [user] = await sql`SELECT id, name, email FROM users WHERE id = ${decoded.id}`;
+        if (user) req.user = user;
+    } catch {
+        // Ignore invalid tokens on public routes
+    }
+
+    next();
+}

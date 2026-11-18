@@ -1,0 +1,62 @@
+# Docker Compose file for CloudNest
+# Run everything with:  docker compose up --build
+#
+# Services:
+#   server -> Express API      http://localhost:3000
+#   client -> React app (nginx) http://localhost:8080
+name: cloudnest
+
+services:
+  server:
+    build:
+      context: ./server
+    container_name: cloudnest-server
+    restart: unless-stopped
+
+    # All your existing backend settings (DATABASE_URL, JWT_SECRET,
+    # AWS_* keys, MAX_FILE_SIZE, ...) are read from server/.env
+    env_file:
+      - ./server/.env
+
+    environment:
+      PORT: 3000
+
+      # Keep this as "development" for local Docker: the auth cookie is
+      # marked `secure` in production, which browsers reject over plain
+      # http://localhost and would break login. Switch to "production"
+      # only when the app is behind HTTPS.
+      NODE_ENV: development
+
+      # Browser origins allowed to call the API (comma separated).
+      ORIGINS: http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173
+
+    ports:
+      - "3000:3000"
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  client:
+    build:
+      context: ./client
+      args:
+        # URL the browser will use to reach the API (must be reachable
+        # from your machine, not from inside the Docker network)
+        VITE_BASE_URL: http://localhost:3000
+    container_name: cloudnest-client
+    restart: unless-stopped
+
+    ports:
+      - "8080:80"
+
+    depends_on:
+      server:
+        condition: service_healthy

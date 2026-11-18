@@ -8,6 +8,7 @@ import DashboardLayout from './components/layout/DashboardLayout'
 import SharedFile from './pages/SharedFile'
 import Trash from './pages/Trash'
 import SharedWithMe from './pages/SharedWithMe'
+import IncomingShares from './pages/IncomingShares'
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
             <Route path="/" element={<Drive />}/>
             <Route path="/drive/:folderId" element={<Drive />}/>
             <Route path="/shared" element={<SharedFile />}/>
+            <Route path="/shared-with-me" element={<IncomingShares />}/>
             <Route path="/trash" element={<Trash />}/>
           </Route>
         </Route>

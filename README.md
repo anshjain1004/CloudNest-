@@ -1,7 +1,5 @@
 # CloudNest - Full-Stack File Storage & Sharing Platform
 
-![CloudNest Logo](client/public/logo.png)
-
 A comprehensive cloud file storage and sharing platform built with the MERN stack, featuring authentication, nested folder organization, multi-file upload, token-based sharing, storage quota tracking, trash/restore functionality, and activity logging.
 
 ## 📖 Project Report
